@@ -1,0 +1,6 @@
+// умови з and, or, not, true, false
+begin
+    if (X >= 0 and X <= 10) or not true then R := 1 else R := 0;
+    if false then skip else Z := 7;
+    if (X + 1) <> 5 then W := 1 else W := 2
+end

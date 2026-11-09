@@ -1,0 +1,6 @@
+// найбільший спільний дільник X і Y відніманням
+begin
+    while not (X = Y) do
+        if X > Y then X := X - Y else Y := Y - X;
+    R := X
+end

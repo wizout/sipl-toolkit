@@ -1,0 +1,5 @@
+// R = 1, якщо X ділиться на Y (тільки + і -)
+begin
+    while X > Y do X := X - Y;
+    if X = Y then R := 1 else R := 0
+end
