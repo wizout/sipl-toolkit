@@ -3,5 +3,6 @@
 __version__ = "0.1.0"
 
 from .errors import SiplError, SiplSyntaxError, SourceSpan
+from .parser import parse, parse_tree
 
-__all__ = ["SiplError", "SiplSyntaxError", "SourceSpan", "__version__"]
+__all__ = ["parse", "parse_tree", "SiplError", "SiplSyntaxError", "SourceSpan", "__version__"]
