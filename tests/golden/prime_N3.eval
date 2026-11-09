@@ -1,0 +1,18 @@
+st = [N ↦ 3]
+AF_SEQ: (IF(S^2(gr, N⇒, 1̅), AS^R(1̅), AS^R(0̅)) · AS^D(2̅) · WH(...))(st) = WH(...)(AS^D(2̅)(IF(S^2(gr, N⇒, 1̅), AS^R(1̅), AS^R(0̅))(st)))
+AF_S, AF_DNM: S^2(gr, N⇒, 1̅)(st) = gr(N⇒(st), 1̅(st)) = gr(3, 1) = true
+AF_IF: IF(S^2(gr, N⇒, 1̅), AS^R(1̅), AS^R(0̅))(st) = AS^R(1̅)(st), бо умова true
+AF_AS: AS^R(1̅)(st) = st∇[R ↦ 1̅(st)] = st∇[R ↦ 1] = [N ↦ 3, R ↦ 1] = st₁
+AF_AS: AS^D(2̅)(st₁) = st₁∇[D ↦ 2̅(st₁)] = st₁∇[D ↦ 2] = [N ↦ 3, R ↦ 1, D ↦ 2] = st₂
+AF_S, AF_DNM: S^2(gr, N⇒, D⇒)(st₂) = gr(N⇒(st₂), D⇒(st₂)) = gr(3, 2) = true
+
+Ітерація 1
+AF_WH: WH(...)(st₂) = WH(...)((IF(...) · AS^D(...))(st₂))
+AF_SEQ: (IF(...) · AS^D(S^2(add, D⇒, 1̅)))(st₂) = AS^D(S^2(add, D⇒, 1̅))(IF(...)(st₂))
+AF_S, AF_DNM: S^2(eq, S^2(mod, N⇒, D⇒), 0̅)(st₂) = eq(mod(N⇒(st₂), D⇒(st₂)), 0̅(st₂)) = eq(mod(3, 2), 0) = eq(1, 0) = false
+AF_IF: IF(...)(st₂) = id(st₂), бо умова false
+AF_ID: id(st₂) = st₂
+AF_AS, AF_S, AF_DNM: AS^D(S^2(add, D⇒, 1̅))(st₂) = st₂∇[D ↦ add(D⇒(st₂), 1̅(st₂))] = st₂∇[D ↦ add(2, 1)] = st₂∇[D ↦ 3] = [N ↦ 3, R ↦ 1, D ↦ 3] = st₃
+AF_S, AF_DNM: S^2(gr, N⇒, D⇒)(st₃) = gr(N⇒(st₃), D⇒(st₃)) = gr(3, 3) = false
+AF_WH: WH(...)(st₃) = st₃, умова false - цикл завершено
+Результат: st₃ = [N ↦ 3, R ↦ 1, D ↦ 3]
