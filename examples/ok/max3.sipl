@@ -1,0 +1,6 @@
+// максимум з трьох
+begin
+    M := A;
+    if B > M then M := B else skip;
+    if C > M then M := C else skip
+end

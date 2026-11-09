@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sipl-toolkit"
+dynamic = ["version"]
+description = "SIPL: парсер, інтерпретатор, дерево виводу та семантичні терми (курс «Теорія програмування»)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Hryhorii Kotilievskyi"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pytest-cov>=4", "lark>=1.1"]
+
+[project.scripts]
+sipl = "sipl.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "sipl.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

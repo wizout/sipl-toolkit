@@ -1,0 +1,9 @@
+// R = (2N)!!
+begin
+    R := 1;
+    while N > 0 do
+    begin
+        R := R * (2 * N);
+        N := N - 1
+    end
+end
