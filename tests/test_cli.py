@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 
@@ -109,7 +110,8 @@ def test_stdin(capsys, monkeypatch):
 
 
 def test_python_m_sipl():
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
     r = subprocess.run([sys.executable, "-m", "sipl", "run", f"{OK}/gcd.sipl",
                         "-s", "X=12", "-s", "Y=18"], capture_output=True, text=True,
-                       encoding="utf-8", env={"PYTHONPATH": str(ROOT / "src"), "PATH": ""})
+                       encoding="utf-8", env=env)
     assert r.returncode == 0 and "R = 6" in r.stdout
