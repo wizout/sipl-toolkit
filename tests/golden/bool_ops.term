@@ -1,0 +1,1 @@
+(IF(S^2(or, S^2(and, S^2(geq, X⇒, 0̅), S^2(leq, X⇒, 1̅0̅)), S^1(neg, t̅r̅u̅e̅)), AS^R(1̅), AS^R(0̅)) · IF(f̅a̅l̅s̅e̅, id, AS^Z(7̅))) · IF(S^2(neq, S^2(add, X⇒, 1̅), 5̅), AS^W(1̅), AS^W(2̅))

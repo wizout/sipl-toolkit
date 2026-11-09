@@ -1,0 +1,1 @@
+(AS^M(A⇒) · IF(S^2(gr, B⇒, M⇒), AS^M(B⇒), id)) · IF(S^2(gr, C⇒, M⇒), AS^M(C⇒), id)
