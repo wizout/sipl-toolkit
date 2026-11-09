@@ -1,6 +1,6 @@
 """SIPL Language Toolkit: парсер, інтерпретатор, дерево виводу і семантичні терми."""
 
-__version__ = "0.1.0"
+__version__ = "0.5.0"
 
 from .errors import SiplError, SiplRuntimeError, SiplSyntaxError, SourceSpan
 from .parser import parse, parse_tree
