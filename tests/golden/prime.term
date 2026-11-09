@@ -1,0 +1,1 @@
+(IF(S^2(gr, N⇒, 1̅), AS^R(1̅), AS^R(0̅)) · AS^D(2̅)) · WH(S^2(gr, N⇒, D⇒), IF(S^2(eq, S^2(mod, N⇒, D⇒), 0̅), AS^R(0̅), id) · AS^D(S^2(add, D⇒, 1̅)))
