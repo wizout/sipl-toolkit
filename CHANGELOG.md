@@ -21,5 +21,7 @@
 - CLI `sipl`: `check`, `parse`, `run`, `tree`, `term`, `eval`, `rules`, режим `--json`,
   стабільні коди завершення.
 - GitHub Actions: тести на Linux і Windows, реліз за тегом.
+- Опис мови: база SIPL з практикуму і розширення SIPL+ (`div`, `mod`, `<=`, `>=`, `<>`,
+  коментарі) окремо, в README і в граматиці.
 
-[0.5.0]: https://github.com/OWNER/sipl-toolkit/releases/tag/v0.5.0
+[0.5.0]: https://github.com/wizout/sipl-toolkit/releases/tag/v0.5.0

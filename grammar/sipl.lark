@@ -4,7 +4,8 @@
 //   <оператор> ::= x := a | S1 ; S2 | if b then S1 else S2 | while b do S | begin S end | skip
 //   <вираз>    ::= n | x | a1 + a2 | a1 - a2 | a1 * a2 | (a)
 //   <умова>    ::= true | false | a1 < a2 | a1 = a2 | a1 > a2 | not b | b1 and b2 | b1 or b2 | (b)
-// Розширення (як у варіантах завдань): div, mod, <=, >=, <>.
+// Розширення SIPL+ (як у варіантах завдань): div, mod, <=, >=, <>, коментарі //.
+// Нижче такі правила позначені "[SIPL+]", все інше - база.
 //
 // Тут пріоритети записані явно, щоб граматика була однозначна:
 //   ';' слабше за if/while, вирази: * div mod сильніше за + -, умови: not > and > or.
@@ -29,8 +30,8 @@ program: "begin" stmts "end"
 
 ?term: factor
      | term "*" factor            -> mult
-     | term "div" factor          -> div
-     | term "mod" factor          -> mod
+     | term "div" factor          -> div      // [SIPL+]
+     | term "mod" factor          -> mod      // [SIPL+]
 
 ?factor: NUMBER                   -> num
        | NAME                     -> var
@@ -46,10 +47,10 @@ program: "begin" stmts "end"
         | aexpr CMP aexpr         -> cmp
         | "(" bexpr ")"
 
-CMP: "<=" | ">=" | "<>" | "<" | ">" | "="
+CMP: "<=" | ">=" | "<>" | "<" | ">" | "="   // "<=", ">=", "<>" - [SIPL+]
 NAME: /(?!(begin|end|if|then|else|while|do|skip|true|false|and|or|not|div|mod)\b)[A-Za-z_][A-Za-z0-9_]*/
 NUMBER: /[0-9]+/
-COMMENT: /\/\/[^\n]*/
+COMMENT: /\/\/[^\n]*/                        // [SIPL+]
 
 %import common.WS
 %ignore WS
