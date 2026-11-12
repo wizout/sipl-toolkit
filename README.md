@@ -1,6 +1,6 @@
 # SIPL Toolkit
 
-[![tests](https://github.com/OWNER/sipl-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/sipl-toolkit/actions/workflows/ci.yml)
+[![tests](https://github.com/wizout/sipl-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/wizout/sipl-toolkit/actions/workflows/ci.yml)
 
 Інструменти для мови SIPL з курсу «Теорія програмування»: граматика, парсер, інтерпретатор,
 дерево синтаксичного виводу, побудова семантичного терму і його обчислення на стані.
@@ -26,7 +26,7 @@
 Потрібен Python 3.10 або новіший. Залежностей у самого пакета немає.
 
 ```bash
-git clone https://github.com/OWNER/sipl-toolkit.git
+git clone https://github.com/wizout/sipl-toolkit.git
 cd sipl-toolkit
 python -m pip install -e ".[dev]"     # на Windows: py -m pip install -e ".[dev]"
 ```
@@ -141,20 +141,45 @@ AF_WH: WH(...)(st₃) = st₃, умова false - цикл завершено
 
 ## Мова
 
-Граматика: `grammar/sipl.lark`. Це БНФ з практикуму плюс розширення, які трапляються у
-варіантах задач:
+Граматика: `grammar/sipl.lark`. Там правила бази і розширення позначені коментарями.
 
-- оператори: `x := a`, `S1; S2`, `if b then S1 else S2`, `while b do S`, `begin S end`, `skip`;
-- вирази: числа, змінні, `+ - *`, а також `div`, `mod`, дужки;
-- умови: `true`, `false`, `< <= = <> > >=`, `not`, `and`, `or`, дужки;
-- коментарі `// до кінця рядка`.
+### SIPL (база з практикуму)
 
-Пріоритети як у практичній 1: `;` слабше за `if` і `while` (тіло циклу з кількох операторів
-береться в `begin ... end`), `S1; S2; S3` = `(S1; S2); S3`, `* div mod` сильніше за `+ -`.
+```
+<програма> ::= begin <оператор> end
+<оператор> ::= x := a | S1 ; S2 | if b then S1 else S2 | while b do S | begin S end | skip
+<вираз>    ::= n | x | a1 + a2 | a1 - a2 | a1 * a2 | ( a )
+<умова>    ::= true | false | a1 < a2 | a1 = a2 | a1 > a2 | not b | b1 and b2 | b1 or b2 | ( b )
+```
+
+Логічні операції пишуться словами: `not`, `and`, `or` замість ¬, ∧, ∨.
+
+### SIPL+ (розширення цього проєкту)
+
+Додано те, що потрібно у варіантах задач з практичних (наприклад, перевірка простоти через `mod`):
+
+| що додано | правило | функція в термі | правило побудови терму |
+|---|---|---|---|
+| ціле ділення | `a1 div a2` | `div` | NS_A_Div |
+| остача | `a1 mod a2` | `mod` | NS_A_Mod |
+| менше або дорівнює | `a1 <= a2` | `leq` | NS_B_leq |
+| більше або дорівнює | `a1 >= a2` | `geq` | NS_B_geq |
+| не дорівнює | `a1 <> a2` | `neq` | NS_B_neq |
+| коментарі | `// до кінця рядка` | | |
+
+`div` і `mod` мають той самий пріоритет, що й `*`. Ділення на 0 дає невизначеність (⊥).
+Програма, написана тільки базою, розбирається і рахується так само, як без розширень,
+тому розширення нічого не ламають.
+
+### Пріоритети
+
+Як у практичній 1: `;` слабше за `if` і `while` (тіло циклу з кількох операторів
+береться в `begin ... end`), `S1; S2; S3` = `(S1; S2); S3`, `* div mod` сильніше за `+ -`,
+у умовах `not` сильніше за `and`, а `and` сильніше за `or`.
 Програма завжди `begin ... end`, у `if` гілка `else` обов'язкова (можна `else skip`).
 
-Функції в термах: `add sub mult div mod` для виразів, `ls leq eq neq gr geq` для порівнянь,
-`and or neg` для логічних операцій.
+Функції в термах: `add sub mult` (база) і `div mod` (розширення) для виразів,
+`ls eq gr` (база) і `leq geq neq` (розширення) для порівнянь, `and or neg` для логіки.
 
 ## Структура
 
