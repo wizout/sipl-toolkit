@@ -103,7 +103,7 @@ class Evaluator:
         self.MAPS = "->" if a else "↦"
         self.NABLA = " <| " if a else "∇"
 
-    # ---------- допоміжне ----------
+    # допоміжне
 
     def r(self, t: Term) -> str:
         return render(t, self.fmt)
@@ -122,7 +122,7 @@ class Evaluator:
     def add(self, rules, text, kind="step"):
         self.steps.append(Step(rules, text, kind))
 
-    # ---------- вирази: ланцюжок рівностей ----------
+    # вирази: ланцюжок рівностей
 
     def expanded(self, t: Term, sn: str) -> str:
         # S^2(add, D⇒, 1̄)(st) -> add(D⇒(st), 1̄(st))  (AF_S, розкрито до кінця)
@@ -197,7 +197,7 @@ class Evaluator:
             raise Undefined(f"умова дала число {v}, а не true/false")
         return v
 
-    # ---------- оператори ----------
+    # оператори
 
     @staticmethod
     def flat(t: Term) -> list[Term]:

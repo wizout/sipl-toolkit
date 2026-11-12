@@ -67,7 +67,7 @@ def test_explain_like_practical_2():
     assert len(steps) == 4
 
 
-# ---------- обчислення терму ----------
+# обчислення терму
 
 def test_eval_prime_3_like_practical_2():
     res = evaluate(build_term(parse(src("prime.sipl"))), {"N": 3})

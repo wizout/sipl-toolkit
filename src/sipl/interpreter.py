@@ -62,7 +62,7 @@ class Interpreter:
                 f"програма не завершилась за {self.max_steps} кроків (можливо, нескінченний цикл)",
                 node.span)
 
-    # ---------- вирази ----------
+    # вирази
 
     def eval_a(self, e: A.Node, st: dict) -> int:
         if isinstance(e, A.Num):
@@ -88,7 +88,7 @@ class Interpreter:
             return (x and y) if b.op == "and" else (x or y)
         raise TypeError(type(b).__name__)
 
-    # ---------- оператори ----------
+    # оператори
 
     def exec(self, s: A.Node, st: dict) -> dict:
         if isinstance(s, A.Program):

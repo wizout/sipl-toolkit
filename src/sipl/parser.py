@@ -89,7 +89,7 @@ class Parser:
         self.tokens = tokenize(source)
         self.pos = 0
 
-    # ---------- допоміжне ----------
+    # допоміжне
 
     @property
     def cur(self) -> Token:
@@ -110,7 +110,7 @@ class Parser:
         msg = f"очікувалось '{value}', а знайдено {self.cur}"
         raise SiplSyntaxError(msg + (f" ({hint})" if hint else ""), self.cur.span)
 
-    # ---------- програма і оператори ----------
+    # програма і оператори
 
     def program(self) -> ParseNode:
         if not self.at("begin"):
@@ -170,7 +170,7 @@ class Parser:
             return node("<оператор>", "S_Skip", leaf(self.take()))
         raise SiplSyntaxError(f"очікувався оператор, а знайдено {t}", t.span)
 
-    # ---------- арифметичні вирази ----------
+    # арифметичні вирази
 
     def aexpr(self) -> ParseNode:
         left = self.term()
@@ -200,7 +200,7 @@ class Parser:
         raise SiplSyntaxError(f"очікувався вираз (число, змінна або дужка), а знайдено {t}",
                               t.span)
 
-    # ---------- умови ----------
+    # умови
 
     def bexpr(self) -> ParseNode:
         left = self.bterm()
@@ -251,7 +251,7 @@ class Parser:
         return node("<умова>", CMP_RULE[op.value], left, leaf(op), self.aexpr())
 
 
-# ---------- дерево виводу -> AST ----------
+# дерево виводу -> AST
 
 def to_ast(p: ParseNode) -> A.Node:
     r, ch, sp = p.rule, p.children, p.span

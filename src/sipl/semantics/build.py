@@ -109,7 +109,7 @@ def build_term(program: A.Node) -> Term:
     return build(program)
 
 
-# ---------- покрокове пояснення ----------
+# покрокове пояснення
 
 @dataclass(frozen=True)
 class Placeholder(Term):

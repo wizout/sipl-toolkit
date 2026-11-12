@@ -29,7 +29,7 @@ class Node:
         return d
 
 
-# ---------- арифметичні вирази ----------
+# арифметичні вирази
 
 @dataclass
 class Num(Node):
@@ -48,7 +48,7 @@ class BinOp(Node):
     right: Node
 
 
-# ---------- умови ----------
+# умови
 
 @dataclass
 class BoolConst(Node):
@@ -74,7 +74,7 @@ class BoolOp(Node):
     right: Node
 
 
-# ---------- оператори ----------
+# оператори
 
 @dataclass
 class Assign(Node):

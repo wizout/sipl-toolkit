@@ -25,7 +25,7 @@ def fragment(node: ParseNode, source: str) -> str:
     return " ".join(node.span.text(source).split())
 
 
-# ---------- текст ----------
+# текст
 
 def to_text(tree: ParseNode, source: str | None = None, show_rules: bool = True) -> str:
     nums = number_leaves(tree)
@@ -54,7 +54,7 @@ def to_text(tree: ParseNode, source: str | None = None, show_rules: bool = True)
     return "\n".join(lines)
 
 
-# ---------- JSON ----------
+# JSON
 
 def to_dict(tree: ParseNode, source: str) -> dict:
     nums = number_leaves(tree)
@@ -78,7 +78,7 @@ def to_json(tree: ParseNode, source: str) -> str:
     return json.dumps(to_dict(tree, source), ensure_ascii=False, indent=2)
 
 
-# ---------- DOT / SVG ----------
+# DOT / SVG
 
 def esc(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
