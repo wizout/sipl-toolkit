@@ -1,51 +1,37 @@
-"""Парсер SIPL методом рекурсивного спуску.
-
-Робота йде у два кроки:
-  1. текст -> дерево синтаксичного виводу (ParseNode), як у практичній 1:
-     вузли - метазмінні <оператор>, <вираз>, ..., листки - термінали;
-  2. дерево виводу -> AST (to_ast): викидаємо дужки, ключові слова і ';'.
-
-Пріоритети такі ж, як у практичній 1: ';' зв'язує слабше за if і while,
-послідовне виконання лівоасоціативне: S1; S2; S3 = (S1; S2); S3.
-"""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 
 from . import ast as A
 from .errors import SiplSyntaxError, SourceSpan
 from .lexer import Token, tokenize
 
-# правила граматики: назва -> текст правила у БНФ (для пояснень і візуалізації)
 RULES = {
-    "P":       "<програма> ::= begin <оператор> end",
-    "S_As":    "<оператор> ::= <змінна> := <вираз>",
-    "S_Seq":   "<оператор> ::= <оператор> ; <оператор>",
-    "S_If":    "<оператор> ::= if <умова> then <оператор> else <оператор>",
+    "P": "<програма> ::= begin <оператор> end",
+    "S_As": "<оператор> ::= <змінна> := <вираз>",
+    "S_Seq": "<оператор> ::= <оператор> ; <оператор>",
+    "S_If": "<оператор> ::= if <умова> then <оператор> else <оператор>",
     "S_While": "<оператор> ::= while <умова> do <оператор>",
     "S_Block": "<оператор> ::= begin <оператор> end",
-    "S_Skip":  "<оператор> ::= skip",
-    "A_Num":   "<вираз> ::= <число>",
-    "A_Var":   "<вираз> ::= <змінна>",
-    "A_Add":   "<вираз> ::= <вираз> + <вираз>",
-    "A_Sub":   "<вираз> ::= <вираз> - <вираз>",
-    "A_Mult":  "<вираз> ::= <вираз> * <вираз>",
-    "A_Div":   "<вираз> ::= <вираз> div <вираз>",
-    "A_Mod":   "<вираз> ::= <вираз> mod <вираз>",
-    "A_Par":   "<вираз> ::= ( <вираз> )",
-    "B_True":  "<умова> ::= true",
+    "S_Skip": "<оператор> ::= skip",
+    "A_Num": "<вираз> ::= <число>",
+    "A_Var": "<вираз> ::= <змінна>",
+    "A_Add": "<вираз> ::= <вираз> + <вираз>",
+    "A_Sub": "<вираз> ::= <вираз> - <вираз>",
+    "A_Mult": "<вираз> ::= <вираз> * <вираз>",
+    "A_Div": "<вираз> ::= <вираз> div <вираз>",
+    "A_Mod": "<вираз> ::= <вираз> mod <вираз>",
+    "A_Par": "<вираз> ::= ( <вираз> )",
+    "B_True": "<умова> ::= true",
     "B_False": "<умова> ::= false",
-    "B_Less":  "<умова> ::= <вираз> < <вираз>",
-    "B_Leq":   "<умова> ::= <вираз> <= <вираз>",
-    "B_Eq":    "<умова> ::= <вираз> = <вираз>",
-    "B_Neq":   "<умова> ::= <вираз> <> <вираз>",
-    "B_Gr":    "<умова> ::= <вираз> > <вираз>",
-    "B_Geq":   "<умова> ::= <вираз> >= <вираз>",
-    "B_Not":   "<умова> ::= not <умова>",
-    "B_And":   "<умова> ::= <умова> and <умова>",
-    "B_Or":    "<умова> ::= <умова> or <умова>",
-    "B_Par":   "<умова> ::= ( <умова> )",
+    "B_Less": "<умова> ::= <вираз> < <вираз>",
+    "B_Leq": "<умова> ::= <вираз> <= <вираз>",
+    "B_Eq": "<умова> ::= <вираз> = <вираз>",
+    "B_Neq": "<умова> ::= <вираз> <> <вираз>",
+    "B_Gr": "<умова> ::= <вираз> > <вираз>",
+    "B_Geq": "<умова> ::= <вираз> >= <вираз>",
+    "B_Not": "<умова> ::= not <умова>",
+    "B_And": "<умова> ::= <умова> and <умова>",
+    "B_Or": "<умова> ::= <умова> or <умова>",
+    "B_Par": "<умова> ::= ( <умова> )",
 }
 
 ARITH_RULE = {"+": "A_Add", "-": "A_Sub", "*": "A_Mult", "div": "A_Div", "mod": "A_Mod"}
@@ -55,7 +41,6 @@ STMT_START = {"if", "while", "begin", "skip"}
 
 @dataclass
 class ParseNode:
-    """Вузол дерева виводу. Листок має token, внутрішній вузол - rule і children."""
     symbol: str
     span: SourceSpan
     rule: str | None = None
@@ -89,8 +74,6 @@ class Parser:
         self.tokens = tokenize(source)
         self.pos = 0
 
-    # ---------- допоміжне ----------
-
     @property
     def cur(self) -> Token:
         return self.tokens[self.pos]
@@ -110,12 +93,11 @@ class Parser:
         msg = f"очікувалось '{value}', а знайдено {self.cur}"
         raise SiplSyntaxError(msg + (f" ({hint})" if hint else ""), self.cur.span)
 
-    # ---------- програма і оператори ----------
-
     def program(self) -> ParseNode:
         if not self.at("begin"):
-            raise SiplSyntaxError(f"програма має починатись з 'begin', а знайдено {self.cur}",
-                                  self.cur.span)
+            raise SiplSyntaxError(
+                f"програма має починатись з 'begin', а знайдено {self.cur}", self.cur.span
+            )
         b = leaf(self.take())
         body = self.statements()
         e = leaf(self.expect("end", "кожному begin потрібен свій end"))
@@ -124,19 +106,20 @@ class Parser:
         return node("<програма>", "P", b, body, e)
 
     def statements(self) -> ParseNode:
-        # S1 ; S2 ; S3 збираю зліва направо: ((S1; S2); S3)
         left = self.statement()
         while True:
             if self.at(";"):
                 semi = leaf(self.take())
                 if self.at("end") or self.cur.kind == "eof":
-                    raise SiplSyntaxError("після ';' очікувався оператор (зайва ';' перед end?)",
-                                          semi.span)
+                    raise SiplSyntaxError(
+                        "після ';' очікувався оператор (зайва ';' перед end?)", semi.span
+                    )
                 right = self.statement()
                 left = node("<оператор>", "S_Seq", left, semi, right)
             elif self.cur.kind == "id" or self.at(*STMT_START):
-                raise SiplSyntaxError(f"між операторами потрібна ';' перед {self.cur}",
-                                      self.cur.span)
+                raise SiplSyntaxError(
+                    f"між операторами потрібна ';' перед {self.cur}", self.cur.span
+                )
             else:
                 return left
 
@@ -170,8 +153,6 @@ class Parser:
             return node("<оператор>", "S_Skip", leaf(self.take()))
         raise SiplSyntaxError(f"очікувався оператор, а знайдено {t}", t.span)
 
-    # ---------- арифметичні вирази ----------
-
     def aexpr(self) -> ParseNode:
         left = self.term()
         while self.at("+", "-"):
@@ -197,10 +178,7 @@ class Parser:
             inner = self.aexpr()
             rp = leaf(self.expect(")"))
             return node("<вираз>", "A_Par", lp, inner, rp)
-        raise SiplSyntaxError(f"очікувався вираз (число, змінна або дужка), а знайдено {t}",
-                              t.span)
-
-    # ---------- умови ----------
+        raise SiplSyntaxError(f"очікувався вираз (число, змінна або дужка), а знайдено {t}", t.span)
 
     def bexpr(self) -> ParseNode:
         left = self.bterm()
@@ -225,8 +203,6 @@ class Parser:
         if self.at("false"):
             return node("<умова>", "B_False", leaf(self.take()))
         if self.at("("):
-            # дужка може відкривати і вираз "(x + 1) > 2", і умову "(x > 1) and ..."
-            # спершу пробую як порівняння, якщо не вийшло - як умову в дужках
             save = self.pos
             try:
                 return self.comparison()
@@ -238,20 +214,19 @@ class Parser:
                 rp = leaf(self.expect(")"))
                 return node("<умова>", "B_Par", lp, inner, rp)
             except SiplSyntaxError as e2:
-                # показую ту помилку, що зайшла далі по тексту
                 raise e2 if e2.span.offset >= err1.span.offset else err1
         return self.comparison()
 
     def comparison(self) -> ParseNode:
         left = self.aexpr()
         if not self.at(*CMP_RULE):
-            raise SiplSyntaxError(f"очікувалось порівняння (<, <=, =, <>, >, >=), а знайдено {self.cur}",
-                                  self.cur.span)
+            raise SiplSyntaxError(
+                f"очікувалось порівняння (<, <=, =, <>, >, >=), а знайдено {self.cur}",
+                self.cur.span,
+            )
         op = self.take()
         return node("<умова>", CMP_RULE[op.value], left, leaf(op), self.aexpr())
 
-
-# ---------- дерево виводу -> AST ----------
 
 def to_ast(p: ParseNode) -> A.Node:
     r, ch, sp = p.rule, p.children, p.span
@@ -274,7 +249,7 @@ def to_ast(p: ParseNode) -> A.Node:
     if r == "A_Var":
         return A.Var(sp, ch[0].children[0].token.value)
     if r in ("A_Par", "B_Par"):
-        return to_ast(ch[1])            # дужки в AST не потрібні
+        return to_ast(ch[1])
     if r in ("A_Add", "A_Sub", "A_Mult", "A_Div", "A_Mod"):
         return A.BinOp(sp, ch[1].token.value, to_ast(ch[0]), to_ast(ch[2]))
     if r in CMP_RULE.values():

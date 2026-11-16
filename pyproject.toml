@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sipl-toolkit"
 dynamic = ["version"]
-description = "SIPL: парсер, інтерпретатор, дерево виводу та семантичні терми (курс «Теорія програмування»)"
+description = 'SIPL: парсер, інтерпретатор, дерево виводу та семантичні терми (курс "Теорія програмування")'
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}

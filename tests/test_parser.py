@@ -24,14 +24,13 @@ def test_bad_examples_fail_with_position(path):
 
 
 def test_counts():
-    # критерій CORE-01: щонайменше 10 правильних і 10 неправильних прикладів
     assert len(OK) >= 10 and len(BAD) >= 10
 
 
 def test_seq_is_left_associative():
     p = parse("begin A := 1; B := 2; C := 3 end")
     assert isinstance(p.body, A.Seq)
-    assert isinstance(p.body.first, A.Seq)          # (A; B); C
+    assert isinstance(p.body.first, A.Seq)
     assert p.body.second.var == "C"
 
 
@@ -48,7 +47,7 @@ def test_arith_priority_and_parens():
     e = parse("begin X := (1 + 2) * 3 end").body.expr
     assert e.op == "*" and e.left.op == "+"
     e = parse("begin X := 10 - 3 - 2 end").body.expr
-    assert e.left.op == "-"                          # (10 - 3) - 2
+    assert e.left.op == "-"
 
 
 def test_bool_priority():
@@ -73,7 +72,6 @@ def test_spans_point_to_source():
 
 
 def test_parse_tree_leaves_give_back_program():
-    # як у практичній 1: листки дерева зліва направо = текст програми
     tree = parse_tree(PRIME)
     leaves = [l.token.value for l in tree.leaves()]
     tokens = [t.value for t in tokenize(PRIME) if t.kind != "eof"]
@@ -87,17 +85,20 @@ def test_parse_tree_rules():
     assert tree.children[1].rule == "S_Seq"
 
 
-@pytest.mark.parametrize("src, piece", [
-    ("begin X := 1 Y := 2 end", "потрібна ';'"),
-    ("begin X := 1; end", "зайва ';'"),
-    ("begin X = 1 end", "':='"),
-    ("begin if X > 0 then skip end", "else"),
-    ("begin X := 1", "'end'"),
-    ("X := 1", "begin"),
-    ("begin X := 1 end end", "зайвий текст"),
-    ("begin X := @ end", "невідомий символ"),
-    ("begin if (X > 1 then skip else skip end", "')'"),
-])
+@pytest.mark.parametrize(
+    "src, piece",
+    [
+        ("begin X := 1 Y := 2 end", "потрібна ';'"),
+        ("begin X := 1; end", "зайва ';'"),
+        ("begin X = 1 end", "':='"),
+        ("begin if X > 0 then skip end", "else"),
+        ("begin X := 1", "'end'"),
+        ("X := 1", "begin"),
+        ("begin X := 1 end end", "зайвий текст"),
+        ("begin X := @ end", "невідомий символ"),
+        ("begin if (X > 1 then skip else skip end", "')'"),
+    ],
+)
 def test_error_messages(src, piece):
     with pytest.raises(SiplSyntaxError) as e:
         parse(src)

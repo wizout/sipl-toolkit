@@ -25,13 +25,13 @@ def test_prime(n):
 
 @pytest.mark.parametrize("x, y", [(2, 0), (2, 10), (3, 4), (1, 7)])
 def test_power(x, y):
-    assert run(prog("power.sipl"), {"X": x, "Y": y})[0]["R"] == x ** y
+    assert run(prog("power.sipl"), {"X": x, "Y": y})[0]["R"] == x**y
 
 
 @pytest.mark.parametrize("n", range(0, 8))
 def test_factorial_and_double_factorial(n):
     assert run(prog("factorial.sipl"), {"N": n})[0]["R"] == math.factorial(n)
-    assert run(prog("double_factorial.sipl"), {"N": n})[0]["R"] == 2 ** n * math.factorial(n)
+    assert run(prog("double_factorial.sipl"), {"N": n})[0]["R"] == 2**n * math.factorial(n)
 
 
 @pytest.mark.parametrize("x, y", [(12, 18), (7, 7), (35, 14), (1, 9)])

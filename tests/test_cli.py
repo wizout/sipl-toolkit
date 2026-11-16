@@ -20,7 +20,7 @@ def call(capsys, *args):
 
 
 def test_check(capsys):
-    assert call(capsys, "check", f"{OK}/prime.sipl")[:2] == (0, "Синтаксис правильний.\n")
+    assert call(capsys, "check", f"{OK}/prime.sipl")[:2] == (0, "Синтаксис правильний\n")
     code, _, err = call(capsys, "check", f"{BAD}/missing_semicolon.sipl")
     assert code == EXIT_SYNTAX and "рядок 3, колонка 5" in err and "^" in err
 
@@ -42,8 +42,9 @@ def test_parse(capsys):
 def test_run(capsys):
     code, out, _ = call(capsys, "run", f"{OK}/power.sipl", "-s", "X=2", "--set", "Y=5")
     assert code == 0 and "R = 32" in out
-    code, out, _ = call(capsys, "run", f"{OK}/power.sipl", "-s", "X=2", "-s", "Y=1",
-                        "--json", "--trace")
+    code, out, _ = call(
+        capsys, "run", f"{OK}/power.sipl", "-s", "X=2", "-s", "Y=1", "--json", "--trace"
+    )
     d = json.loads(out)
     assert d["state"]["R"] == 2 and d["trace"][-1]["event"] == "finish"
     code, out, _ = call(capsys, "run", f"{OK}/factorial.sipl", "-s", "N=3", "--trace")
@@ -52,7 +53,7 @@ def test_run(capsys):
 
 def test_run_errors(capsys):
     assert call(capsys, "run", f"{OK}/loop_forever.sipl", "--max-steps", "10")[0] == EXIT_UNDEFINED
-    assert call(capsys, "run", f"{OK}/power.sipl")[0] == EXIT_UNDEFINED     # X, Y не задані
+    assert call(capsys, "run", f"{OK}/power.sipl")[0] == EXIT_UNDEFINED
     assert call(capsys, "run", f"{OK}/power.sipl", "-s", "X")[0] == EXIT_USAGE
     assert call(capsys, "run", f"{OK}/power.sipl", "-s", "X=a")[0] == EXIT_USAGE
     assert call(capsys, "run", f"{OK}/power.sipl", "-s", "1X=2")[0] == EXIT_USAGE
@@ -74,6 +75,7 @@ def test_tree(capsys, tmp_path):
 
 def test_tree_svg_without_graphviz(capsys, monkeypatch):
     import shutil
+
     monkeypatch.setattr(shutil, "which", lambda name: None)
     assert call(capsys, "tree", f"{OK}/prime.sipl", "-f", "svg")[0] == EXIT_USAGE
 
@@ -105,13 +107,18 @@ def test_rules(capsys):
 
 def test_stdin(capsys, monkeypatch):
     import io
+
     monkeypatch.setattr(sys, "stdin", io.StringIO("begin X := 2 end"))
     assert "X = 2" in call(capsys, "run", "-")[1]
 
 
 def test_python_m_sipl():
     env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
-    r = subprocess.run([sys.executable, "-m", "sipl", "run", f"{OK}/gcd.sipl",
-                        "-s", "X=12", "-s", "Y=18"], capture_output=True, text=True,
-                       encoding="utf-8", env=env)
+    r = subprocess.run(
+        [sys.executable, "-m", "sipl", "run", f"{OK}/gcd.sipl", "-s", "X=12", "-s", "Y=18"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env=env,
+    )
     assert r.returncode == 0 and "R = 6" in r.stdout

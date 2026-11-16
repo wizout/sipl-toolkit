@@ -1,12 +1,3 @@
-"""Інтерпретатор SIPL: виконує AST на стані змінних.
-
-Стан - це словник {ім'я змінної: ціле число}. Програма невизначена (кидаю
-SiplRuntimeError), якщо читається змінна без значення, ділимо на 0, або цикл
-не встиг завершитись за max_steps кроків.
-"""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 
 from . import ast as A
@@ -24,19 +15,17 @@ def apply_arith(op: str, x: int, y: int, span=None) -> int:
         return x * y
     if y == 0:
         raise SiplRuntimeError(f"{op} на нуль не визначено", span)
-    # div і mod беру як у математиці для натуральних: 7 div 2 = 3, 7 mod 2 = 1
     return x // y if op == "div" else x % y
 
 
 def apply_cmp(op: str, x: int, y: int) -> bool:
-    return {"<": x < y, "<=": x <= y, "=": x == y,
-            "<>": x != y, ">": x > y, ">=": x >= y}[op]
+    return {"<": x < y, "<=": x <= y, "=": x == y, "<>": x != y, ">": x > y, ">=": x >= y}[op]
 
 
 @dataclass
 class TraceEvent:
     step: int
-    event: str              # "assign", "cond", "skip", "finish"
+    event: str
     span: dict | None
     detail: dict = field(default_factory=dict)
 
@@ -60,9 +49,8 @@ class Interpreter:
         if self.steps > self.max_steps:
             raise SiplRuntimeError(
                 f"програма не завершилась за {self.max_steps} кроків (можливо, нескінченний цикл)",
-                node.span)
-
-    # ---------- вирази ----------
+                node.span,
+            )
 
     def eval_a(self, e: A.Node, st: dict) -> int:
         if isinstance(e, A.Num):
@@ -83,12 +71,9 @@ class Interpreter:
         if isinstance(b, A.Not):
             return not self.eval_b(b.operand, st)
         if isinstance(b, A.BoolOp):
-            # обидві частини рахую завжди, як у композиційній семантиці S^2(or, ...)
             x, y = self.eval_b(b.left, st), self.eval_b(b.right, st)
             return (x and y) if b.op == "and" else (x or y)
         raise TypeError(type(b).__name__)
-
-    # ---------- оператори ----------
 
     def exec(self, s: A.Node, st: dict) -> dict:
         if isinstance(s, A.Program):
@@ -98,7 +83,7 @@ class Interpreter:
         if isinstance(s, A.Assign):
             self.tick(s)
             v = self.eval_a(s.expr, st)
-            st = {**st, s.var: v}          # st ∇ [x ↦ v], старий стан не чіпаю
+            st = {**st, s.var: v}
             self.log("assign", s, var=s.var, value=v, state=dict(st))
             return st
         if isinstance(s, A.Seq):
@@ -125,8 +110,11 @@ class Interpreter:
         raise TypeError(type(s).__name__)
 
 
-def run(program: A.Program, state: dict | None = None,
-        max_steps: int = DEFAULT_MAX_STEPS, trace: bool = False):
-    """Виконує програму. Повертає (кінцевий стан, interp), в interp.trace - події."""
+def run(
+    program: A.Program,
+    state: dict | None = None,
+    max_steps: int = DEFAULT_MAX_STEPS,
+    trace: bool = False,
+):
     it = Interpreter(max_steps, trace)
     return it.exec(program, dict(state or {})), it

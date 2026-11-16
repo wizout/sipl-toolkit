@@ -1,11 +1,3 @@
-"""Абстрактне синтаксичне дерево (AST) мови SIPL.
-
-На відміну від дерева виводу, тут немає дужок, ключових слів і крапок з комою,
-тільки сама структура програми. Кожен вузол пам'ятає свій span у тексті.
-"""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field, fields
 
 from .errors import SourceSpan
@@ -16,8 +8,9 @@ class Node:
     span: SourceSpan = field(repr=False, compare=False)
 
     def children(self) -> list["Node"]:
-        return [getattr(self, f.name) for f in fields(self)
-                if isinstance(getattr(self, f.name), Node)]
+        return [
+            getattr(self, f.name) for f in fields(self) if isinstance(getattr(self, f.name), Node)
+        ]
 
     def to_dict(self) -> dict:
         d = {"node": type(self).__name__, "span": self.span.to_dict()}
@@ -28,8 +21,6 @@ class Node:
             d[f.name] = v.to_dict() if isinstance(v, Node) else v
         return d
 
-
-# ---------- арифметичні вирази ----------
 
 @dataclass
 class Num(Node):
@@ -43,12 +34,10 @@ class Var(Node):
 
 @dataclass
 class BinOp(Node):
-    op: str          # "+", "-", "*", "div", "mod"
+    op: str
     left: Node
     right: Node
 
-
-# ---------- умови ----------
 
 @dataclass
 class BoolConst(Node):
@@ -57,7 +46,7 @@ class BoolConst(Node):
 
 @dataclass
 class Compare(Node):
-    op: str          # "<", "<=", "=", "<>", ">", ">="
+    op: str
     left: Node
     right: Node
 
@@ -69,12 +58,10 @@ class Not(Node):
 
 @dataclass
 class BoolOp(Node):
-    op: str          # "and", "or"
+    op: str
     left: Node
     right: Node
 
-
-# ---------- оператори ----------
 
 @dataclass
 class Assign(Node):
@@ -103,7 +90,6 @@ class While(Node):
 
 @dataclass
 class Block(Node):
-    """begin S end всередині програми"""
     body: Node
 
 

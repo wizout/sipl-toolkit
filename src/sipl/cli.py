@@ -1,20 +1,3 @@
-"""Командний рядок: sipl <команда> файл.sipl [опції]
-
-  check  перевірити синтаксис
-  parse  показати AST
-  run    виконати програму (інтерпретатор)
-  tree   дерево синтаксичного виводу: text | json | dot | svg
-  term   семантичний терм: text | ascii | latex | json, з --explain покроково
-  eval   обчислити терм на стані з поясненням кожного переходу
-  rules  список правил NS_* та AF_*
-
-Коди завершення: 0 - все добре, 1 - синтаксична помилка, 2 - неправильні аргументи,
-3 - програма невизначена на цьому стані (ділення на 0, невідома змінна, ліміт кроків),
-4 - файл не знайдено або не читається.
-"""
-
-from __future__ import annotations
-
 import argparse
 import json
 import sys
@@ -29,6 +12,7 @@ EXIT_OK, EXIT_SYNTAX, EXIT_USAGE, EXIT_UNDEFINED, EXIT_FILE = 0, 1, 2, 3, 4
 
 def ast_text(node, indent=0) -> str:
     from . import ast as A
+
     pad = "  " * indent
     name = type(node).__name__
     extra = ""
@@ -72,15 +56,21 @@ def build_argparser() -> argparse.ArgumentParser:
     def cmd(name, help_):
         p = sub.add_parser(name, help=help_)
         if name != "rules":
-            p.add_argument("file", help="файл з програмою SIPL ('-' - читати зі stdin)")
+            p.add_argument("file", help="файл з програмою SIPL ('-' означає stdin)")
         p.add_argument("--json", action="store_true", help="вивід у JSON")
         return p
 
     cmd("check", "перевірити синтаксис")
     cmd("parse", "показати AST")
     p = cmd("run", "виконати програму")
-    p.add_argument("--set", "-s", action="append", default=[], metavar="X=N",
-                   help="початкове значення змінної, можна кілька разів")
+    p.add_argument(
+        "--set",
+        "-s",
+        action="append",
+        default=[],
+        metavar="X=N",
+        help="початкове значення змінної, можна кілька разів",
+    )
     p.add_argument("--max-steps", type=int, default=DEFAULT_MAX_STEPS)
     p.add_argument("--trace", action="store_true", help="показати події виконання")
     p = cmd("tree", "дерево синтаксичного виводу")
@@ -107,7 +97,7 @@ def read_source(path: str) -> str:
 def main(argv: list[str] | None = None) -> int:
     for stream in (sys.stdout, sys.stderr):
         try:
-            stream.reconfigure(encoding="utf-8")      # щоб на Windows не ламались ⇒, ↦
+            stream.reconfigure(encoding="utf-8")
         except (AttributeError, ValueError):
             pass
 
@@ -115,13 +105,15 @@ def main(argv: list[str] | None = None) -> int:
     as_json = args.json
 
     def out(obj_or_text):
-        print(json.dumps(obj_or_text, ensure_ascii=False, indent=2)
-              if as_json else obj_or_text)
+        print(json.dumps(obj_or_text, ensure_ascii=False, indent=2) if as_json else obj_or_text)
 
     def fail(code, err: SiplError | str, source: str | None = None):
         if as_json:
-            e = err.to_dict() if isinstance(err, SiplError) else {"kind": "error",
-                                                                  "message": str(err)}
+            e = (
+                err.to_dict()
+                if isinstance(err, SiplError)
+                else {"kind": "error", "message": str(err)}
+            )
             out({"ok": False, "error": e})
         else:
             print(f"Помилка: {err}", file=sys.stderr)
@@ -134,13 +126,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "rules":
         from .semantics.build import RULE_TEXT
         from .semantics.evaluate import AF_TEXT
+
         if as_json:
             out({"NS": RULE_TEXT, "AF": AF_TEXT})
         else:
-            out("Побудова терму (NS_*):\n" +
-                "\n".join(f"  {k:12} {v}" for k, v in RULE_TEXT.items()) +
-                "\n\nОбчислення терму на стані (AF_*):\n" +
-                "\n".join(f"  {k:12} {v}" for k, v in AF_TEXT.items()))
+            out(
+                "Побудова терму (NS_*):\n"
+                + "\n".join(f"  {k:12} {v}" for k, v in RULE_TEXT.items())
+                + "\n\nОбчислення терму на стані (AF_*):\n"
+                + "\n".join(f"  {k:12} {v}" for k, v in AF_TEXT.items())
+            )
         return EXIT_OK
 
     try:
@@ -160,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
         return fail(EXIT_USAGE, str(e))
 
     if args.cmd == "check":
-        out({"ok": True} if as_json else "Синтаксис правильний.")
+        out({"ok": True} if as_json else "Синтаксис правильний")
         return EXIT_OK
 
     if args.cmd == "parse":
@@ -182,18 +177,25 @@ def main(argv: list[str] | None = None) -> int:
                 for ev in it.trace:
                     where = f"{ev.span['line']}:{ev.span['col']}"
                     if ev.event == "assign":
-                        print(f"[{ev.step:>4}] {where:>6}  {ev.detail['var']} := {ev.detail['value']}")
+                        print(
+                            f"[{ev.step:>4}] {where:>6}  {ev.detail['var']} := {ev.detail['value']}"
+                        )
                     elif ev.event == "cond":
-                        print(f"[{ev.step:>4}] {where:>6}  умова {ev.detail['kind']}: "
-                              f"{str(ev.detail['value']).lower()}")
+                        print(
+                            f"[{ev.step:>4}] {where:>6}  умова {ev.detail['kind']}: "
+                            f"{str(ev.detail['value']).lower()}"
+                        )
                     elif ev.event == "skip":
                         print(f"[{ev.step:>4}] {where:>6}  skip")
-            print("Кінцевий стан: " + (", ".join(f"{k} = {v}" for k, v in final.items())
-                                       or "порожній"))
+            print(
+                "Кінцевий стан: "
+                + (", ".join(f"{k} = {v}" for k, v in final.items()) or "порожній")
+            )
         return EXIT_OK
 
     if args.cmd == "tree":
         from . import visualization as V
+
         try:
             if as_json or args.format == "json":
                 text = V.to_json(tree, source)
@@ -215,6 +217,7 @@ def main(argv: list[str] | None = None) -> int:
 
     from .semantics import build_term, evaluate, explain
     from .semantics.terms import to_dict as term_dict
+
     term = build_term(program)
 
     if args.cmd == "term":

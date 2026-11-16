@@ -1,5 +1,3 @@
-"""Перевіряю, що формальна граматика grammar/sipl.lark і парсер погоджуються:
-однакові програми приймаються/відкидаються і дають однакову структуру."""
 import pytest
 
 lark = pytest.importorskip("lark")
@@ -10,11 +8,17 @@ from sipl.errors import SiplSyntaxError
 
 from conftest import BAD, OK, ROOT
 
-GRAMMAR = lark.Lark((ROOT / "grammar" / "sipl.lark").read_text(encoding="utf-8"),
-                    parser="earley")
+GRAMMAR = lark.Lark((ROOT / "grammar" / "sipl.lark").read_text(encoding="utf-8"), parser="earley")
 
-LARK_NAMES = {"add": "+", "sub": "-", "mult": "*", "div": "div", "mod": "mod",
-              "or_": "or", "and_": "and"}
+LARK_NAMES = {
+    "add": "+",
+    "sub": "-",
+    "mult": "*",
+    "div": "div",
+    "mod": "mod",
+    "or_": "or",
+    "and_": "and",
+}
 
 
 def from_lark(t):

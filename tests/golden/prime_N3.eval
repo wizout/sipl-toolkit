@@ -14,5 +14,5 @@ AF_IF: IF(...)(st₂) = id(st₂), бо умова false
 AF_ID: id(st₂) = st₂
 AF_AS, AF_S, AF_DNM: AS^D(S^2(add, D⇒, 1̅))(st₂) = st₂∇[D ↦ add(D⇒(st₂), 1̅(st₂))] = st₂∇[D ↦ add(2, 1)] = st₂∇[D ↦ 3] = [N ↦ 3, R ↦ 1, D ↦ 3] = st₃
 AF_S, AF_DNM: S^2(gr, N⇒, D⇒)(st₃) = gr(N⇒(st₃), D⇒(st₃)) = gr(3, 3) = false
-AF_WH: WH(...)(st₃) = st₃, умова false - цикл завершено
+AF_WH: WH(...)(st₃) = st₃, умова false, цикл завершено
 Результат: st₃ = [N ↦ 3, R ↦ 1, D ↦ 3]

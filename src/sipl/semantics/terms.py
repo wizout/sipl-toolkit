@@ -1,20 +1,5 @@
-"""Семантичні терми в нотації курсу і їх запис текстом.
-
-  Const(1)        1̄          константа (функція, що на будь-якому стані дає 1)
-  Deref("N")      N⇒         розіменування: значення змінної N у стані
-  Sup("gr", a, b) S²(gr, a, b) суперпозиція: gr(a(st), b(st))
-  AS("R", t)      ASᴿ(t)     присвоєння: st ∇ [R ↦ t(st)]
-  Comp(f, g)      f · g      композиція: спочатку f, потім g
-  IF(p, f, g)     IF(p, f, g)
-  WH(p, f)        WH(p, f)
-  Id()            id
-"""
-
-from __future__ import annotations
-
 from dataclasses import dataclass
 
-# назви базових функцій, як у практичних
 ARITH_FN = {"+": "add", "-": "sub", "*": "mult", "div": "div", "mod": "mod"}
 CMP_FN = {"<": "ls", "<=": "leq", "=": "eq", "<>": "neq", ">": "gr", ">=": "geq"}
 BOOL_FN = {"and": "and", "or": "or", "not": "neg"}
@@ -74,9 +59,7 @@ class Id(Term):
     pass
 
 
-# ---------- запис термів ----------
-
-OVER = "̅"   # комбінована риска зверху, ставлю після кожного символу константи
+OVER = "̅"
 
 
 def const_str(v, fmt="text") -> str:
@@ -93,7 +76,7 @@ def render(t: Term, fmt: str = "text") -> str:
     arrow = r"\Rightarrow" if L else ("=>" if fmt == "ascii" else "⇒")
     dot = r" \cdot " if L else (" . " if fmt == "ascii" else " · ")
 
-    def name(s):           # назви функцій та операторів
+    def name(s):
         return r"\mathit{%s}" % s if L else s
 
     def r(t):
@@ -109,7 +92,6 @@ def render(t: Term, fmt: str = "text") -> str:
             head = r"\mathit{AS}^{%s}" % t.var if L else f"AS^{t.var}"
             return f"{head}({r(t.expr)})"
         if isinstance(t, Comp):
-            # S1; S2; S3 = (S1; S2); S3, тому ліву композицію беру в дужки, як у практичній
             a = r(t.first)
             if isinstance(t.first, Comp):
                 a = f"({a})"
@@ -129,13 +111,15 @@ def render(t: Term, fmt: str = "text") -> str:
 
 
 def short(t: Term, fmt: str = "text", limit: int = 40) -> str:
-    """Короткий запис для трасування: довгий терм скорочую до IF(...), WH(...)."""
     full = render(t, fmt)
     if len(full) <= limit:
         return full
     if isinstance(t, Comp):
-        return short(t.first, fmt, limit // 2) + (" . " if fmt == "ascii" else " · ") + \
-            short(t.second, fmt, limit // 2)
+        return (
+            short(t.first, fmt, limit // 2)
+            + (" . " if fmt == "ascii" else " · ")
+            + short(t.second, fmt, limit // 2)
+        )
     if isinstance(t, AS):
         return f"AS^{t.var}(...)"
     if isinstance(t, Sup):
@@ -155,8 +139,12 @@ def to_dict(t: Term) -> dict:
     if isinstance(t, Comp):
         return {"term": "Comp", "first": to_dict(t.first), "second": to_dict(t.second)}
     if isinstance(t, IF):
-        return {"term": "IF", "cond": to_dict(t.cond), "then": to_dict(t.then),
-                "else": to_dict(t.else_)}
+        return {
+            "term": "IF",
+            "cond": to_dict(t.cond),
+            "then": to_dict(t.then),
+            "else": to_dict(t.else_),
+        }
     if isinstance(t, WH):
         return {"term": "WH", "cond": to_dict(t.cond), "body": to_dict(t.body)}
     return {"term": "Id"}

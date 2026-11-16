@@ -1,38 +1,39 @@
-"""Побудова семантичного терму з AST за правилами NS_* (практична 2).
-
-Терм будується рекурсивно: кожен вузол AST перетворюється за своїм правилом,
-а замість дітей підставляються їхні терми.
-"""
-
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from .. import ast as A
-from .terms import (AS, ARITH_FN, BOOL_FN, CMP_FN, IF, WH, Comp, Const, Deref, Id, Sup,
-                    Term, render)
+from .terms import AS, ARITH_FN, BOOL_FN, CMP_FN, IF, WH, Comp, Const, Deref, Id, Sup, Term, render
 
-ARITH_RULE = {"+": "NS_A_Add", "-": "NS_A_Sub", "*": "NS_A_Mult",
-              "div": "NS_A_Div", "mod": "NS_A_Mod"}
-CMP_RULE = {"<": "NS_B_ls", "<=": "NS_B_leq", "=": "NS_B_eq",
-            "<>": "NS_B_neq", ">": "NS_B_gr", ">=": "NS_B_geq"}
+ARITH_RULE = {
+    "+": "NS_A_Add",
+    "-": "NS_A_Sub",
+    "*": "NS_A_Mult",
+    "div": "NS_A_Div",
+    "mod": "NS_A_Mod",
+}
+CMP_RULE = {
+    "<": "NS_B_ls",
+    "<=": "NS_B_leq",
+    "=": "NS_B_eq",
+    "<>": "NS_B_neq",
+    ">": "NS_B_gr",
+    ">=": "NS_B_geq",
+}
 
-# самі правила, щоб показувати їх у поясненні та в документації
 RULE_TEXT = {
-    "NS_Prog":     "sem_P(begin S end) = sem_S(S)",
-    "NS_Stm_Seq":  "sem_S(S1; S2) = sem_S(S1) · sem_S(S2)",
-    "NS_Stm_As":   "sem_S(x := a) = AS^x(sem_A(a))",
-    "NS_Stm_If":   "sem_S(if b then S1 else S2) = IF(sem_B(b), sem_S(S1), sem_S(S2))",
-    "NS_Stm_Wh":   "sem_S(while b do S) = WH(sem_B(b), sem_S(S))",
-    "NS_Stm_BE":   "sem_S(begin S end) = sem_S(S)",
+    "NS_Prog": "sem_P(begin S end) = sem_S(S)",
+    "NS_Stm_Seq": "sem_S(S1; S2) = sem_S(S1) · sem_S(S2)",
+    "NS_Stm_As": "sem_S(x := a) = AS^x(sem_A(a))",
+    "NS_Stm_If": "sem_S(if b then S1 else S2) = IF(sem_B(b), sem_S(S1), sem_S(S2))",
+    "NS_Stm_Wh": "sem_S(while b do S) = WH(sem_B(b), sem_S(S))",
+    "NS_Stm_BE": "sem_S(begin S end) = sem_S(S)",
     "NS_Stm_skip": "sem_S(skip) = id",
-    "NS_A_Num":    "sem_A(n) = n̄",
-    "NS_A_Var":    "sem_A(x) = x⇒",
-    "NS_B_True":   "sem_B(true) = true̅",
-    "NS_B_False":  "sem_B(false) = false̅",
-    "NS_B_Neg":    "sem_B(not b) = S^1(neg, sem_B(b))",
-    "NS_B_And":    "sem_B(b1 and b2) = S^2(and, sem_B(b1), sem_B(b2))",
-    "NS_B_Or":     "sem_B(b1 or b2) = S^2(or, sem_B(b1), sem_B(b2))",
+    "NS_A_Num": "sem_A(n) = n̄",
+    "NS_A_Var": "sem_A(x) = x⇒",
+    "NS_B_True": "sem_B(true) = true̅",
+    "NS_B_False": "sem_B(false) = false̅",
+    "NS_B_Neg": "sem_B(not b) = S^1(neg, sem_B(b))",
+    "NS_B_And": "sem_B(b1 and b2) = S^2(and, sem_B(b1), sem_B(b2))",
+    "NS_B_Or": "sem_B(b1 or b2) = S^2(or, sem_B(b1), sem_B(b2))",
 }
 for _op, _rule in ARITH_RULE.items():
     RULE_TEXT[_rule] = f"sem_A(a1 {_op} a2) = S^2({ARITH_FN[_op]}, sem_A(a1), sem_A(a2))"
@@ -73,8 +74,6 @@ def rule_of(n: A.Node) -> str:
 
 
 def build(n: A.Node, sub=None) -> Term:
-    """AST -> терм. sub(child) дозволяє підставити замість дитини щось своє
-    (так пояснення показує sem_S(...) для вкладених операторів)."""
     s = sub or build
     if isinstance(n, (A.Program, A.Block)):
         return s(n.body)
@@ -109,16 +108,12 @@ def build_term(program: A.Node) -> Term:
     return build(program)
 
 
-# ---------- покрокове пояснення ----------
-
 @dataclass(frozen=True)
 class Placeholder(Term):
-    """sem_S(фрагмент) - ще не розкритий вкладений оператор"""
     text: str
 
 
 def fragment(n: A.Node, source: str, limit: int = 40) -> str:
-    """Текст оператора для запису sem_S(...). Довгі if/while скорочую до заголовка."""
     s = " ".join(n.span.text(source).split())
     if len(s) <= limit:
         return s
@@ -126,14 +121,14 @@ def fragment(n: A.Node, source: str, limit: int = 40) -> str:
         return f"if {fragment(n.cond, source)} then ..."
     if isinstance(n, A.While):
         return f"while {fragment(n.cond, source)} do ..."
-    return s[:limit - 3].rstrip() + "..."
+    return s[: limit - 3].rstrip() + "..."
 
 
 @dataclass
 class ExplainStep:
     rules: list[str]
-    lhs: str          # sem_S(фрагмент)
-    rhs: str          # терм, де вкладені if/while ще записані як sem_S(...)
+    lhs: str
+    rhs: str
     span: dict
 
     def text(self) -> str:
@@ -144,14 +139,10 @@ class ExplainStep:
 
 
 def is_compound(n: A.Node) -> bool:
-    # такі оператори пояснюю окремим кроком, решту розкриваю одразу на місці
     return isinstance(n, (A.If, A.While))
 
 
 def explain(program: A.Program, source: str, fmt: str = "text") -> list[ExplainStep]:
-    """Кроки як у практичній 2. Послідовності, begin-end, присвоєння, skip і вирази
-    розкриваються одразу; вкладені if і while пишуться як sem_S(...) і розкриваються
-    наступними кроками."""
     steps = []
 
     def visit(n: A.Node, lhs: str):
@@ -169,8 +160,7 @@ def explain(program: A.Program, source: str, fmt: str = "text") -> list[ExplainS
 
         rules.append(rule_of(n))
         term = build(n, sub)
-        steps.append(ExplainStep(rules, lhs, render_with_placeholders(term, fmt),
-                                 n.span.to_dict()))
+        steps.append(ExplainStep(rules, lhs, render_with_placeholders(term, fmt), n.span.to_dict()))
         for c in later:
             visit(c, f"sem_S({fragment(c, source)})")
 
@@ -179,7 +169,6 @@ def explain(program: A.Program, source: str, fmt: str = "text") -> list[ExplainS
 
 
 def render_with_placeholders(t: Term, fmt: str) -> str:
-    # render() не знає про Placeholder, тому підміняю його тимчасово на змінну з таким ім'ям
     if isinstance(t, Placeholder):
         return t.text
     marks = {}
